@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scclient-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scclient
+  template:
+    metadata:
+      labels:
+        app: scclient
+    spec:
+      hostNetwork: true  # 启用 hostNetwork
+      containers:
+      - name: scclient
+        image: scclient:latest
+        imagePullPolicy: IfNotPresent

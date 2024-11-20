@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scclient-deployment
+  namespace: edaapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scclient
+  template:
+    metadata:
+      labels:
+        app: scclient
+    spec:
+      initContainers:
+      - name: modprobe-fuse
+        image: scclient:latest
+        imagePullPolicy: IfNotPresent
+        command: ["modprobe", "fuse"]
+        securityContext:
+          privileged: true
+      containers:
+      - name: scclient-container
+        image: scclient:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000

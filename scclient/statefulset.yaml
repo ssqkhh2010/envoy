@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: scclient-deployment
+  namespace: edaapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scclient
+  serviceName: "scclient"
+  template:
+    metadata:
+      labels:
+        app: scclient
+    spec:
+      containers:
+      - name: scclient-container
+        image: scclient:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: local-vol
+          mountPath: "/data"
+      volumes:
+      - name: local-vol
+        hostPath:
+          path: /app/pvctest
+          type: DirectoryOrCreate

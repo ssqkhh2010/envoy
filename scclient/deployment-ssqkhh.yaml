@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scclient-deployment
+  namespace: edaapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scclient
+  template:
+    metadata:
+      labels:
+        app: scclient
+    spec:
+      containers:
+      - name: scclient-container
+        image: ssqkhh/scclient:latest
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 5000

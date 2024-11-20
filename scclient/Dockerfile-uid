@@ -1,0 +1,43 @@
+FROM ubuntu:23.04
+
+# 设置代理环境变量
+ENV use_proxy=on \
+    no_proxy=localhost,127.0.0.1,*.example.com \
+    http_proxy=http://192.168.159.129:22222 \
+    https_proxy=http://192.168.159.129:22222
+
+RUN apt update && apt install -y \
+    bash \
+    curl \
+    unzip \
+    vim \
+    git \
+    wget \
+    net-tools \
+    python3 \
+    telnet \
+    s3fs \
+    fuse \
+    dnsutils
+
+ENV use_proxy=off \
+    no_proxy= \
+    http_proxy= \
+    https_proxy=
+
+# 创建新用户和组
+RUN groupadd -g 1001 scclient && \
+    useradd -u 1001 -g scclient -s /bin/bash -m scclient
+
+WORKDIR /app
+
+# 复制文件并设置权限
+COPY --chown=scclient:scclient ./scclient /app/
+RUN chmod +x /app/scclient
+
+# 切换到非 root 用户
+USER scclient
+
+EXPOSE 8184
+
+CMD ["/app/scclient"]

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scclient-deployment
+  namespace: edaapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scclient
+  template:
+    metadata:
+      labels:
+        app: scclient
+    spec:
+      containers:
+      - name: scclient-container
+        image: scclient:latest
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          capabilities:
+            add: ["SYS_ADMIN"]
+          allowPrivilegeEscalation: true
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: fuse
+          mountPath: /dev/fuse
+      volumes:
+      - name: fuse
+        hostPath:
+          path: /dev/fuse

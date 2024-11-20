@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scclient-deployment
+  namespace: edaapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scclient
+  template:
+    metadata:
+      labels:
+        app: scclient
+    spec:
+      securityContext:
+        runAsUser: 1002
+        runAsGroup: 1002
+        fsGroup: 1002
+      initContainers:
+      - name: init-tmp-dir
+        image: ubuntu:23.04
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            groupadd -g 1002 scclient || true
+            useradd -u 1002 -g 1002 -s /bin/bash -m scclient || true
+            mkdir -p /app_tmp/tmp
+            chown -R 1002:1002 /app_tmp
+            chmod -R 755 /app_tmp
+        securityContext:
+          privileged: true
+          runAsUser: 0
+          allowPrivilegeEscalation: true
+        volumeMounts:
+        - name: app-tmp
+          mountPath: /app_tmp
+      containers:
+      - name: scclient-container
+        image: scclient:latest
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 1002
+          runAsGroup: 1002
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: app-tmp
+          mountPath: /app/tmp
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: app-tmp
+        emptyDir: {}
+      - name: logs
+        hostPath:
+          path: /app/logs
+          type: DirectoryOrCreate
